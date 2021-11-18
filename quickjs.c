@@ -32,6 +32,7 @@
 #include <time.h>
 #include <fenv.h>
 #include <math.h>
+#include <mcheck.h>
 #if defined(__APPLE__)
 #include <malloc/malloc.h>
 #elif defined(__linux__)
@@ -108,7 +109,7 @@
 //#define DUMP_READ_OBJECT
 
 /* test the GC by forcing it before each object allocation */
-//#define FORCE_GC_AT_MALLOC
+// #define FORCE_GC_AT_MALLOC
 
 #ifdef CONFIG_ATOMICS
 #include <pthread.h>
@@ -1605,6 +1606,10 @@ JSRuntime *JS_NewRuntime2(const JSMallocFunctions *mf, void *opaque)
     JSRuntime *rt;
     JSMallocState ms;
 
+    #ifdef MTRACE
+    mtrace();
+    #endif
+
     memset(&ms, 0, sizeof(ms));
     ms.opaque = opaque;
     ms.malloc_limit = -1;
@@ -2206,6 +2211,7 @@ void JS_SetClassProto(JSContext *ctx, JSClassID class_id, JSValue obj)
     assert(class_id < rt->class_count);
     set_value(ctx, &ctx->class_proto[class_id], obj);
 }
+
 
 JSValue JS_GetClassProto(JSContext *ctx, JSClassID class_id)
 {
